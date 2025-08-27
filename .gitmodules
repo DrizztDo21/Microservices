@@ -1,0 +1,9 @@
+[submodule "AngularClientApp"]
+	path = AngularClientApp
+	url = https://github.com/DrizztDo21/AngularClientApp.git
+[submodule "eCommerceSolution.UsersService"]
+	path = eCommerceSolution.UsersService
+	url = https://github.com/DrizztDo21/eCommerceSolution.UsersService.git
+[submodule "eCommerceSolution.ProductService"]
+	path = eCommerceSolution.ProductService
+	url = https://github.com/DrizztDo21/eCommerceSolution.ProductService.git
