@@ -7,3 +7,6 @@
 [submodule "eCommerceSolution.ProductService"]
 	path = eCommerceSolution.ProductService
 	url = https://github.com/DrizztDo21/eCommerceSolution.ProductService.git
+[submodule "eCommerceSolution.OrdersService"]
+	path = eCommerceSolution.OrdersService
+	url = https://github.com/DrizztDo21/eCommerceSolution.OrdersService.git
