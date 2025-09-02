@@ -22,7 +22,7 @@ services:
    MYSQL_DATABASE: ecommerceproductsdatabase
    MYSQL_PORT: 3306
   ports:
-   - 6000:8080
+   - 6001:8080
   networks:
    - ecommerce-network
    - products-mysql-network
