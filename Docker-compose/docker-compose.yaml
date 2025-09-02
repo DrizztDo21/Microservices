@@ -8,9 +8,12 @@ services:
   volumes:
    - ./mysql-init:/docker-entrypoint-initdb.d
   networks:
-   - products-mysql-netwrok
+   - products-mysql-network
 
  products-microservice:
+  build:
+   context: ../eCommerceSolution.ProductService
+   dockerfile: ProductsMicroService.API/Dockerfile
   image: ecommerce-solution.product-service:v1.0.0
   environment:
    MYSQL_HOST: mysql-container
@@ -22,7 +25,7 @@ services:
    - 6000:8080
   networks:
    - ecommerce-network
-   - products-mysql-netwrok
+   - products-mysql-network
   depends_on:
    - mysql-container
   
@@ -40,6 +43,9 @@ services:
    - users-postgres-network
   
  users-microservice:
+  build:
+   context: ../eCommerceSolution.UsersService
+   dockerfile: eCommerce.API/Dockerfile
   image: ecommerce-solution.user-service:v1.0.0
   environment:
    POSTGRES_HOST: postgres-container
@@ -65,6 +71,9 @@ services:
    - orders-mongodb-network
 
  orders-microservice:
+  build:
+   context: ../eCommerceSolution.OrdersService
+   dockerfile: OrdersMicroservice.API/Dockerfile
   image: ecommerce-solution.order-service:v1.0.0
   environment:
    MONGO_HOST: mongodb-container
@@ -87,7 +96,7 @@ networks:
   driver: bridge
  orders-mongodb-network:
   driver: bridge
- products-mysql-netwrok:
+ products-mysql-network:
   driver: bridge
  users-postgres-network:
   driver: bridge

@@ -7,3 +7,5 @@ CREATE TABLE public."Users"
     "Gender" character varying(15) COLLATE pg_catalog."default",
     CONSTRAINT "Users_pkey" PRIMARY KEY ("UserID")
 );
+
+INSERT INTO public."Users" VALUES('85ac09e6-a19c-4a03-a684-269d17996eb9', 'Test', 'test@test.com', 'pass', 'Male');
