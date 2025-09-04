@@ -62,20 +62,28 @@ El repositorio principal incluye los siguientes submódulos:
 
         git clone --recurse-submodules https://github.com/DrizztDo21/Microservices.git
 
-2. Levantar el entorno completo con Docker Compose:  
+2. Levantar el entorno completo con Docker Compose (desde ./Microservices/Docker-compose):  
 
         docker-compose up -d
 
    Esto desplegará:  
    - Los tres microservicios  
-   - El API Gateway  
-   - El cliente en Angular  
+   - El API Gateway   
    - PostgreSQL, MySQL, MongoDB y Redis  
    - Scripts de inicialización de bases de datos  
 
-3. Acceder a la aplicación:  
+3. Compilar el cliente (desde ./Miscroservices/AngularClientApp):  
 
-        http://localhost:4200  
+        ng build
+   
+3. Levantar el servidor (desde ./Miscroservices/AngularClientApp):  
+
+        ng serve
+   
+5. Acceder a la aplicación:  
+
+        http://localhost:4200
+   
 
 ## 📐 Arquitectura
 
