@@ -10,3 +10,6 @@
 [submodule "eCommerceSolution.OrdersService"]
 	path = eCommerceSolution.OrdersService
 	url = https://github.com/DrizztDo21/eCommerceSolution.OrdersService.git
+[submodule "eCommerceSolution.ApiGateway"]
+	path = eCommerceSolution.ApiGateway
+	url = https://github.com/DrizztDo21/eCommerceSolution.ApiGateway.git
