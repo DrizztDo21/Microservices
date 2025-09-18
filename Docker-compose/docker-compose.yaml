@@ -106,11 +106,24 @@ services:
   build:
    context: ../eCommerceSolution.ApiGateway
    dockerfile: ApiGateway/Dockerfile
-  image: apigateway:v1.0.0
+  image: ecommerce-solution.apigateway:v1.0.0
   ports:
    - "4000:8080"
   networks:
    - ecommerce-network
+
+ frontend-angular:
+  build:
+   context: ../AngularClientApp
+   dockerfile: Dockerfile
+  image: ecommerce-solution.angular-client:v1.0.0
+  ports:
+   - "4200:80"
+  networks:
+   - ecommerce-network
+  depends_on:
+   - apigateway
+
 
 networks:
  ecommerce-network:
