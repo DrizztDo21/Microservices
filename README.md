@@ -69,18 +69,11 @@ El repositorio principal incluye los siguientes submódulos:
    Esto desplegará:  
    - Los tres microservicios  
    - El API Gateway   
+   - El cliente en Angular
    - PostgreSQL, MySQL, MongoDB y Redis  
    - Scripts de inicialización de bases de datos  
-
-3. Compilar el cliente (desde ./Miscroservices/AngularClientApp):  
-
-        ng build
    
-3. Levantar el servidor (desde ./Miscroservices/AngularClientApp):  
-
-        ng serve
-   
-5. Acceder a la aplicación:  
+3. Acceder a la aplicación:  
 
         http://localhost:4200
    
