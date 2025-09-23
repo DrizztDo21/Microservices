@@ -31,14 +31,16 @@ El repositorio principal incluye los siguientes submódulos:
   - Endpoints: CRUD de productos y búsqueda con filtros.  
   - Arquitectura: **Layered Architecture**  
   - Base de datos: **MySQL**  
-  - ORM: **Entity Framework Core**  
+  - ORM: **Entity Framework Core**
+  - **Event Publisher (RabbitMQ):** publica eventos cuando se modifica el nombre de un producto o se elimina. 
   - Funcionalidad: administración del catálogo de productos.  
 
 - **Orders Microservice**  
   - Endpoints: CRUD de órdenes.  
   - Arquitectura: **Layered Architecture**  
   - Base de datos: **MongoDB**  
-  - Cache: **Redis**  
+  - Cache: **Redis**
+  - **Event Consumer (RabbitMQ):** procesa eventos de Products Microservice para actualizar o eliminar productos en la cache de Redis
   - Funcionalidad: gestión de órdenes, comunicándose con *Users* y *Products* para obtener información detallada de usuarios y productos.  
 
 - **API Gateway**  
@@ -98,6 +100,9 @@ flowchart TD
 
     E -.->|consulta a Users| B
     E -.->|consulta a Products| B
+
+    D -- "eventos (update/delete producto)" --> Q[(RabbitMQ)]
+    Q --> E
 ```
 
 ## 🎯 Objetivo del Proyecto
@@ -106,7 +111,7 @@ flowchart TD
 - Aplicar distintos enfoques arquitectónicos: **Clean Architecture** y **Layered Architecture**.  
 - Aplicar **Polyglot Persistence**, combinando bases de datos SQL y NoSQL según el dominio del microservicio. 
 - Aplicar buenas prácticas con **AutoMapper**, **FluentValidation**, y patrones de desacoplamiento.  
-- Centralizar la comunicación mediante un **API Gateway** en .NET 8.  
+- Implementar comunicación sincrona (API Gateway) y asíncrona (RabbitMQ) entre microservicios.  
 - Mostrar conocimientos en **contenedores y despliegue con Docker Compose**.
 
 ## 🧑‍💻 Skills Demonstrated
@@ -115,9 +120,10 @@ flowchart TD
 - Aplicación de **Clean Architecture** y **Layered Architecture** en .NET.  
 - Desarrollo e integración de un **API Gateway** como punto de entrada único.  
 - Trabajo con **bases de datos poliglotas (Polyglot Persistence)**: PostgreSQL, MySQL y MongoDB.  
-- Implementación de **caching distribuido** con Redis.  
+- Implementación de **caching distribuido** con Redis.
+- Comunicación asíncrona entre microservicios mediante RabbitMQ.
 - Uso de **ORMs diferentes** según la necesidad: Dapper y Entity Framework Core.  
 - Aplicación de buenas prácticas: AutoMapper, FluentValidation, DTOs, separación de capas.  
-- Despliegue completo con **Docker Compose**, incluyendo microservicios, gateway, frontend y dependencias.  
+- Despliegue completo con **Docker Compose**, incluyendo microservicios, gateway, frontend, redis, RabbitMQ y dependencias.  
 - Gestión de repositorios con **Git Submodules**.  
 - Desarrollo de **frontend en Angular** integrado con APIs REST.
