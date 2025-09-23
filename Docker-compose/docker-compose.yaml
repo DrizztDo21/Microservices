@@ -1,136 +1,190 @@
 services:
- mysql-container:
-  image: mysql:latest
-  environment:
-   MYSQL_ROOT_PASSWORD: admin
-  ports:
-   - 3306:3306
-  volumes:
-   - ./mysql-init:/docker-entrypoint-initdb.d
-  networks:
-   - products-mysql-network
+  mysql-container:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - products-mysql-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-padmin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
- products-microservice:
-  build:
-   context: ../eCommerceSolution.ProductService
-   dockerfile: ProductsMicroService.API/Dockerfile
-  image: ecommerce-solution.product-service:v1.0.0
-  environment:
-   MYSQL_HOST: mysql-container
-   MYSQL_PASSWORD: admin
-   MYSQL_USER: root
-   MYSQL_DATABASE: ecommerceproductsdatabase
-   MYSQL_PORT: 3306
-  ports:
-   - 6001:8080
-  networks:
-   - ecommerce-network
-   - products-mysql-network
-  depends_on:
-   - mysql-container
-  
- postgres-container:
-  image: postgres:latest
-  environment:
-   POSTGRES_USER: postgres
-   POSTGRES_PASSWORD: admin
-   POSTGRES_DB: eCommerceUsers
-  ports:
-   - 5432:5432
-  volumes:
-   - ./postgres-init:/docker-entrypoint-initdb.d
-  networks:
-   - users-postgres-network
-  
- users-microservice:
-  build:
-   context: ../eCommerceSolution.UsersService
-   dockerfile: eCommerce.API/Dockerfile
-  image: ecommerce-solution.user-service:v1.0.0
-  environment:
-   POSTGRES_HOST: postgres-container
-   POSTGRES_PASSWORD: admin
-   POSTGRES_USER: postgres
-   POSTGRES_DATABASE: eCommerceUsers
-   POSTGRES_PORT: 5432
-  ports:
-   - 5000:8080
-  networks:
-   - ecommerce-network
-   - users-postgres-network
-  depends_on:
-   - postgres-container
+  products-microservice:
+    build:
+      context: ../eCommerceSolution.ProductService
+      dockerfile: ProductsMicroService.API/Dockerfile
+    image: ecommerce-solution.product-service:v1.0.0
+    environment:
+      MYSQL_HOST: mysql-container
+      MYSQL_PASSWORD: admin
+      MYSQL_USER: root
+      MYSQL_DATABASE: ecommerceproductsdatabase
+      MYSQL_PORT: 3306
+      RABBITMQ_HOST: rabbitmq-container
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin
+      RABBITMQ_PRODUCTS_EXCHANGE: product.exchange
+    ports:
+      - 6001:8080
+    networks:
+      - ecommerce-network
+      - products-mysql-network
+    depends_on:
+      rabbitmq-container:
+        condition: service_healthy
+      mysql-container:
+        condition: service_healthy
 
- mongodb-container:
-  image: mongo:latest
-  ports:
-   - 27017:27017
-  volumes:
-   - ./mongodb-init:/docker-entrypoint-initdb.d
-  networks:
-   - orders-mongodb-network
+  postgres-container:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: eCommerceUsers
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - users-postgres-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
- orders-microservice:
-  build:
-   context: ../eCommerceSolution.OrdersService
-   dockerfile: OrdersMicroservice.API/Dockerfile
-  image: ecommerce-solution.order-service:v1.0.0
-  environment:
-   MONGO_HOST: mongodb-container
-   MONGO_PORT: 27017
-   MONGO_DATABASE: OrdersDatabase
-   UsersMicroServiceName: apigateway
-   UsersMicroServicePort: 8080
-   ProductsMicroServiceName: apigateway
-   ProductsMicroServicePort: 8080
-   REDIS_HOST: redis-container
-   REDIS_PORT: 6379
-  ports:
-   - 7000:8080
-  networks:
-   - ecommerce-network
-   - orders-mongodb-network
-  depends_on:
-   - mongodb-container
-  
- redis-container:
-  image: redis:latest
-  ports:
-   - "6379:6379"
-  volumes:
-   - ./redis-cache:/data
-  networks:
-   - ecommerce-network
- 
- apigateway:
-  build:
-   context: ../eCommerceSolution.ApiGateway
-   dockerfile: ApiGateway/Dockerfile
-  image: ecommerce-solution.apigateway:v1.0.0
-  ports:
-   - "4000:8080"
-  networks:
-   - ecommerce-network
+  users-microservice:
+    build:
+      context: ../eCommerceSolution.UsersService
+      dockerfile: eCommerce.API/Dockerfile
+    image: ecommerce-solution.user-service:v1.0.0
+    environment:
+      POSTGRES_HOST: postgres-container
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_DATABASE: eCommerceUsers
+      POSTGRES_PORT: 5432
+    ports:
+      - 5000:8080
+    networks:
+      - ecommerce-network
+      - users-postgres-network
+    depends_on:
+      postgres-container:
+        condition: service_healthy
 
- frontend-angular:
-  build:
-   context: ../AngularClientApp
-   dockerfile: Dockerfile
-  image: ecommerce-solution.angular-client:v1.0.0
-  ports:
-   - "4200:80"
-  networks:
-   - ecommerce-network
-  depends_on:
-   - apigateway
+  mongodb-container:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb-init:/docker-entrypoint-initdb.d
+    networks:
+      - orders-mongodb-network
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand({ ping: 1 })' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  orders-microservice:
+    build:
+      context: ../eCommerceSolution.OrdersService
+      dockerfile: OrdersMicroservice.API/Dockerfile
+    image: ecommerce-solution.order-service:v1.0.0
+    environment:
+      MONGO_HOST: mongodb-container
+      MONGO_PORT: 27017
+      MONGO_DATABASE: OrdersDatabase
+      UsersMicroServiceName: apigateway
+      UsersMicroServicePort: 8080
+      ProductsMicroServiceName: apigateway
+      ProductsMicroServicePort: 8080
+      REDIS_HOST: redis-container
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq-container
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin
+      RABBITMQ_PRODUCTS_EXCHANGE: product.exchange
+    ports:
+      - 7000:8080
+    networks:
+      - ecommerce-network
+      - orders-mongodb-network
+    depends_on:
+      mongodb-container:
+        condition: service_healthy
+      redis-container:
+        condition: service_healthy
+      rabbitmq-container:
+        condition: service_healthy
+
+  redis-container:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-cache:/data
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  apigateway:
+    build:
+      context: ../eCommerceSolution.ApiGateway
+      dockerfile: ApiGateway/Dockerfile
+    image: ecommerce-solution.apigateway:v1.0.0
+    ports:
+      - "4000:8080"
+    networks:
+      - ecommerce-network
+
+  rabbitmq-container:
+    image: rabbitmq:4.1.4-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend-angular:
+    build:
+      context: ../AngularClientApp
+      dockerfile: Dockerfile
+    image: ecommerce-solution.angular-client:v1.0.0
+    ports:
+      - "4200:80"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - apigateway
 
 networks:
- ecommerce-network:
-  driver: bridge
- orders-mongodb-network:
-  driver: bridge
- products-mysql-network:
-  driver: bridge
- users-postgres-network:
-  driver: bridge
+  ecommerce-network:
+    driver: bridge
+  orders-mongodb-network:
+    driver: bridge
+  products-mysql-network:
+    driver: bridge
+  users-postgres-network:
+    driver: bridge
